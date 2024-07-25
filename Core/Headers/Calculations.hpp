@@ -3,6 +3,8 @@
 #include <vector>
 #include <iostream>
 #include <random>
+#include <unordered_map>
+
 
 class Calculations
 {
@@ -15,10 +17,10 @@ private: // check
 	static bool isSafe(const std::vector<std::vector<unsigned short>>& board, const unsigned short& row, const unsigned short& col, const unsigned short& currNum);
 
 
-	static void printBoard();
-
-public:
+	static void printBoard(const std::vector<std::vector<unsigned short>>& board);
 	static void initPermanentNumbers();
+public:
+	
 	static unsigned int count;
 	static bool solveSudoku(std::vector<std::vector<unsigned short>>& board, unsigned short row, unsigned short col);
 

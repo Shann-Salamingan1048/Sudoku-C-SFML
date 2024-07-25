@@ -97,30 +97,55 @@ bool Calculations::solveSudoku(std::vector<std::vector<unsigned short>>& board, 
     }
     return false;
 }
-void Calculations::printBoard()
+void Calculations::printBoard(const std::vector<std::vector<unsigned short>>& board)
 {
     for (int i = 0; i < 9; i++)
     {
         for (int j = 0; j < 9; j++)
-            std::cout << tileMapSolution[i][j] << " ";
+            std::cout << board[i][j] << " ";
         std::cout << "\n";
     }
 }
 void Calculations::initPermanentNumbers()
 {
-    std::vector<std::pair<unsigned short, unsigned short>> posPermanentNums;
+    unsigned short QuantityCounter = 0;
+    const unsigned short QuantityNumberMax = 4;
+    std::unordered_map<unsigned short, unsigned short> savePos;
+    
+    while (QuantityCounter < QuantityNumberMax)
+    {
+        // Create a random device
+        std::random_device rd;
+
+        // Create a Mersenne Twister engine
+        std::mt19937 gen(rd());
+
+        // Create a uniform distribution between 1 and 9
+        std::uniform_int_distribution<unsigned short> genNum(1, 9);
+
+        // Generate a random number
+        unsigned short randomPermanentNumber = genNum(gen);
+
+        // position of the random Permanent Number
+        std::uniform_int_distribution<unsigned short> genPosX(0, 8);
+        std::uniform_int_distribution<unsigned short> genPosY(0, 8);
+        unsigned short X_Pos = genPosX(gen);
+        unsigned short Y_Pos = genPosY(gen);
+        if (tileMap[Y_Pos][X_Pos] != randomPermanentNumber)
+        {
+            tileMap[Y_Pos][X_Pos] = randomPermanentNumber;
+            QuantityCounter++;
+        }
+    } 
 }
 Calculations::Calculations()
 {
+    this->initPermanentNumbers();
+    this->printBoard(tileMap);
+    std::cout << "\n";
     count = 0;
-    if (this->solveSudoku(tileMapSolution, 0, 0))
-    {
-        //this->printBoard();
-    }
-    else
-    {
-        std::cout << "no solution\n";
-    }
-    this->printBoard();
+    
+
+    this->printBoard(tileMapSolution);
     std::cout << "count: " << count << "\n";
 }

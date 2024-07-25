@@ -20,7 +20,7 @@ inline std::vector<std::vector<unsigned short>> tileMap =
 
 inline std::vector<std::vector<unsigned short>> tileMapSolution =
 {
-	{0, 0, 0,      4, 6, 0,      0, 0, 0},
+	{0, 0, 0,      0, 0, 0,      0, 0, 0},
 	{0, 0, 0,      0, 0, 0,      0, 0, 0},
 	{0, 0, 0,      0, 0, 0,      0, 0, 0},
 
