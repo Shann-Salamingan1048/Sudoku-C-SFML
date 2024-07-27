@@ -34,25 +34,21 @@ void UI::updateNumbers(sf::Vector2f& mousePos)
             switch (this->btn_state) // check if it is permanent or a permanent number tile so it wont be colored
             {
             case btn_idle:
-                if (!this->numTilePermanentOrNot[i][k] && !this->clickedOrNot[i][k] && tileMap[i][k] == 0) // if it is 0 or empty tile then make it orig Color(pink)
+                if (!this->numTilePermanentOrNot[i][k] && !this->clickedOrNot[i][k] && tileMap[i][k] == 0 ) // if it is 0 or empty tile then make it orig Color(pink)
                     this->numTileVec[i][k]->setFillColor(this->OrigColorTile);
-                else if (!this->numTilePermanentOrNot[i][k] && !this->clickedOrNot[i][k] && tileMap[i][k] != 0) // if it is not 0 or empty tile then make it grey
+                else if (!this->numTilePermanentOrNot[i][k] && !this->clickedOrNot[i][k] && tileMap[i][k] != 0 ) // if it is not 0 or empty tile then make it grey
                     this->numTileVec[i][k]->setFillColor(sf::Color(128, 128, 128, 128)); // half transparent grey
                 break;
             case btn_hover:
                 if (!this->numTilePermanentOrNot[i][k] && !this->clickedOrNot[i][k])
-                    this->numTileVec[i][k]->setFillColor(sf::Color(0, 255, 0, 128)); // half transparent blue
+                    this->numTileVec[i][k]->setFillColor(sf::Color(0, 255, 0, 128)); // half transparent green
                 break;
             case btn_clicked:
                 if (this->clickedOrNot[i][k] && !this->numTilePermanentOrNot[i][k]) // so that it wont color the permanent numbers when clicked. Temporary
                     this->numTileVec[i][k]->setFillColor(sf::Color(0, 0, 255, 128)); // half transparent blue
                 break;
-            default:
-                if (!this->numTilePermanentOrNot[i][k])
-                    this->numTileVec[i][k]->setFillColor(sf::Color::Red); // just in case if it errors
-                break;
             }
-
+            
             if (this->clickedOrNot[i][k])
             {
                 if (this->tempNum1 != 10 && !this->numTilePermanentOrNot[i][k]) // out of scope of the sudoku 1 - 9. 0 is erase
@@ -69,13 +65,70 @@ void UI::updateNumbers(sf::Vector2f& mousePos)
                     }
 
                     tileMap[i][k] = this->tempNum1; // update tileMap
+                   
                     this->numTileVec[i][k] = std::move(rectTemp);
+
+                   
                 }
+                if (cal.checkCol(tileMap, i, k, this->tempNum1) && cal.checkRow(tileMap, i, k, this->tempNum1) && cal.check_3by3_grid(tileMap, i, k, this->tempNum1))
+                {
+                    this->tempNum1 = 10; // back to 10
+                    break;
+                }
+                else if (!cal.checkCol(tileMap, i, k, this->tempNum1) && cal.checkRow(tileMap, i, k, this->tempNum1) && cal.check_3by3_grid(tileMap, i, k, this->tempNum1))
+                {
+                    this->makeColRed(i, k);
+                }
+                else if (!cal.checkRow(tileMap, i, k, this->tempNum1) && cal.check_3by3_grid(tileMap, i, k, this->tempNum1) && cal.checkCol(tileMap, i, k, this->tempNum1))
+                {
+                    this->makeRowRed(i, k);
+                }
+                else if (!cal.check_3by3_grid(tileMap, i, k, this->tempNum1) && cal.checkCol(tileMap, i, k, this->tempNum1) && cal.checkRow(tileMap, i, k, this->tempNum1))
+                {
+                    this->make_3by3_Red(i, k);
+                }
+                else if (!cal.check_3by3_grid(tileMap, i, k, this->tempNum1) && !cal.checkCol(tileMap, i, k, this->tempNum1) && !cal.checkRow(tileMap, i, k, this->tempNum1))
+                {
+                    this->makeColRed(i, k);
+                    this->makeRowRed(i, k);
+                    this->make_3by3_Red(i, k);
+                }
+
                 this->tempNum1 = 10; // back to 10
             }
+            
         }
     }
 
+}
+void UI::make_3by3_Red(const unsigned short& row, const unsigned short& col)
+{
+    // check 3 x 3
+    unsigned short startCol = col - (col % 3);
+    unsigned short startRow = row - (row % 3);
+    for (unsigned short i = 0; i < 3; i++)
+    {
+        for (unsigned short k = 0; k < 3; k++)
+        {
+            this->numTileVec[i + startRow][k + startCol]->setFillColor(sf::Color::Red);
+            
+        }
+    }
+
+}
+void UI::makeRowRed(const unsigned short& row, const unsigned short& col)
+{
+    for (unsigned short i = 0; i < Row; i++) // chcek col
+    {
+        this->numTileVec[i][col]->setFillColor(sf::Color::Red);
+    }
+}
+void UI::makeColRed(const unsigned short& row, const unsigned short& col)
+{
+    for (unsigned short i = 0; i < Col; i++) // chcek col
+    {
+        this->numTileVec[row][i]->setFillColor(sf::Color::Red);
+    }
 }
 unsigned short UI::pollEvents(sf::Event& evnt)
 {

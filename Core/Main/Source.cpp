@@ -1,17 +1,18 @@
 #include <iostream>
 #include "..\Headers\GamePanel.hpp"
-#include "..\Headers\Calculations.hpp"
+
 int main()
 {
-	/*GamePanel game;
+	
+	GamePanel game;
 	while (game.isRunning())
 	{
 		game.update();
 		game.render();
 	}
-	*/
+	
 
-	Calculations cal;
+	
 	return 0;
 }
 /*

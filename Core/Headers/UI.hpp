@@ -8,8 +8,14 @@
 #include <vector>
 #include "Global.hpp"
 #include <iostream>
+#include "Calculations.hpp"
 class UI final
 {
+private:
+	Calculations cal;
+	void makeColRed(const unsigned short& row, const unsigned short& col);
+	void makeRowRed(const unsigned short& row, const unsigned short& col);
+	void make_3by3_Red(const unsigned short& row, const unsigned short& col);
 private:
 	sf::RectangleShape Grid;
 	sf::Texture textGrid;

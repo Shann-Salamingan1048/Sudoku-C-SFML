@@ -27,7 +27,7 @@ bool Calculations::check_3by3_grid(const std::vector<std::vector<unsigned short>
     {
         for (unsigned short k = 0; k < 3; k++)
         {
-            if (board[i + startRow][k + startCol] == currNum)
+            if (board[i + startRow][k + startCol] == currNum )
             {
                 return false;
             }
@@ -97,6 +97,39 @@ bool Calculations::solveSudoku(std::vector<std::vector<unsigned short>>& board, 
     }
     return false;
 }
+bool Calculations::solveSudoku(const std::vector<std::pair<unsigned short, unsigned short>>& savedPos, std::vector<std::vector<unsigned short>>& board, unsigned short row, unsigned short col)
+{
+    count++;
+    if (row == 8 && col == 9) // the output will be true if the target value has reached. Row = 8 and Col = 9 (max) with no issue or mistake 
+        return true;
+
+    if (col == 9)
+    {
+        row++;
+        col = 0;
+    }
+    if (board[row][col] > 0)
+        return solveSudoku(board, row, col + 1);
+    for (const auto& [y, x] : savedPos) 
+    {
+        if (y == row &&  x == col) // if it is the same position of the permanent numbers 
+            return solveSudoku(board, row, col + 1);
+    }
+    for (int num = 1; num <= 9; num++)
+    {
+        
+        if (isSafe(board, row, col, num))
+        {
+
+            board[row][col] = num;
+
+            if (solveSudoku(board, row, col + 1)) // this will make the solveSudoku true if it satisfies the condition
+                return true;
+        }
+        board[row][col] = 0; // yes undoing the previous number if the assumption is not correct
+    }
+    return false;
+}
 void Calculations::printBoard(const std::vector<std::vector<unsigned short>>& board)
 {
     for (int i = 0; i < 9; i++)
@@ -106,46 +139,106 @@ void Calculations::printBoard(const std::vector<std::vector<unsigned short>>& bo
         std::cout << "\n";
     }
 }
+
+void Calculations::genNumsSolutions(std::vector<std::pair<unsigned short, unsigned short>>& savePos)
+{
+    count++;
+    std::fill(tileMapSolution.begin(), tileMapSolution.end(), std::vector<unsigned short>(9, 0));
+    
+    // Create a list of all positions
+    std::vector<std::pair<unsigned short, unsigned short>> positions;
+    for (unsigned short i = 0; i < 9; ++i)
+    {
+        for (unsigned short j = 0; j < 9; ++j)
+        {
+            positions.emplace_back(i, j);
+        }
+    }
+
+    // Shuffle positions
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(positions.begin(), positions.end(), gen); // shuffle the positions like a deck of card
+
+    unsigned short QuantityCounter = 0;
+    const unsigned short QuantityNumberMax = 2;
+
+    // Place random numbers in the shuffled positions
+    for (const auto& pos : positions)
+    {
+        if (QuantityCounter >= QuantityNumberMax)
+            break;
+
+        std::uniform_int_distribution<unsigned short> genNum(1, 9);
+        unsigned short seedNumber = genNum(gen);
+        auto [row, col] = pos;
+
+        if (tileMapSolution[row][col] == 0) // Ensure the position is empty
+        {
+            tileMapSolution[row][col] = seedNumber;
+           
+            savePos.push_back(pos);
+            ++QuantityCounter;
+        }
+    }
+}
+
 void Calculations::initPermanentNumbers()
 {
-    unsigned short QuantityCounter = 0;
-    const unsigned short QuantityNumberMax = 4;
-    std::unordered_map<unsigned short, unsigned short> savePos;
-    
-    while (QuantityCounter < QuantityNumberMax)
+    std::vector<std::pair<unsigned short, unsigned short>> savedPos;
+
+    // Fill the board with unique numbers at random positions
+    genNumsSolutions(savedPos);
+    // Try solving the Sudoku with the generated positions
+    while (!solveSudoku(savedPos, tileMapSolution, 0, 0))
     {
-        // Create a random device
-        std::random_device rd;
+        // If unsolvable, clear positions and try again
+ 
+        genNumsSolutions(savedPos);
+    }
 
-        // Create a Mersenne Twister engine
-        std::mt19937 gen(rd());
-
-        // Create a uniform distribution between 1 and 9
-        std::uniform_int_distribution<unsigned short> genNum(1, 9);
-
-        // Generate a random number
-        unsigned short randomPermanentNumber = genNum(gen);
-
-        // position of the random Permanent Number
-        std::uniform_int_distribution<unsigned short> genPosX(0, 8);
-        std::uniform_int_distribution<unsigned short> genPosY(0, 8);
-        unsigned short X_Pos = genPosX(gen);
-        unsigned short Y_Pos = genPosY(gen);
-        if (tileMap[Y_Pos][X_Pos] != randomPermanentNumber)
+    // create permanent nums
+    /// Create a list of all positions
+    std::vector<std::pair<unsigned short, unsigned short>> positions;
+    for (unsigned short i = 0; i < 9; ++i)
+    {
+        for (unsigned short j = 0; j < 9; ++j)
         {
-            tileMap[Y_Pos][X_Pos] = randomPermanentNumber;
-            QuantityCounter++;
+            positions.emplace_back(i, j);
         }
-    } 
+    }
+
+    // Shuffle positions
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::shuffle(positions.begin(), positions.end(), gen); // shuffle the positions like a deck of card
+
+    unsigned short QuantityCounter = 0;
+    const unsigned short QuantityNumberMax = 10;
+    // Place random numbers in the shuffled positions
+    for (const auto& pos : positions)
+    {
+        if (QuantityCounter >= QuantityNumberMax)
+            break;
+
+        std::uniform_int_distribution<unsigned short> genNum(1, 9);
+        unsigned short seedNumber = genNum(gen);
+        auto [row, col] = pos;
+
+
+        tileMap[row][col] = tileMapSolution[row][col];
+        ++QuantityCounter;
+    }
 }
+
 Calculations::Calculations()
 {
     this->initPermanentNumbers();
-    this->printBoard(tileMap);
+   
+    this->printBoard(tileMapSolution);
     std::cout << "\n";
-    count = 0;
     
 
-    this->printBoard(tileMapSolution);
-    std::cout << "count: " << count << "\n";
+    this->printBoard(tileMap);
+    std::cout << "Count: " << count << "\n";
 }
